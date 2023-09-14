@@ -1,0 +1,1 @@
+docker build -t kosmapanelhtml:1.0 /etc/KosmaPanel/docker/html

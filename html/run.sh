@@ -1,0 +1,1 @@
+docker run -e SFTP_USER=myuser -e SFTP_PASSWORD=mypassword -e WEB_PORT=8080 -e SFTP_PORT=2222 -p 8080:80 -p 2222:22 kosmapanelhtml:1.0
