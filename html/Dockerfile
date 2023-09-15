@@ -12,7 +12,7 @@ ENV SFTP_PASSWORD=${SFTP_PASSWORD:-sftppassword}
 ENV WEBMANAGER_KEY=${WEBMANAGER_KEY:-1234}
 
 # Install necessary packages
-RUN apt-get update && apt-get install -y openssh-server curl nginx mariadb-server git runit sudo nano htop neofetch software-properties-common apt-transport-https ca-certificates gnupg certbot tar unzip zip
+RUN apt update && apt install -y openssh-server curl nginx mariadb-server git runit sudo nano htop neofetch software-properties-common apt-transport-https ca-certificates gnupg certbot tar unzip zip
 
 # Download html template from GitHub
 RUN cd /var/www/html && \
@@ -28,7 +28,10 @@ EXPOSE 99
 RUN sed -i 's/bind-address.*=.*/bind-address = 0.0.0.0/' /etc/mysql/mariadb.conf.d/50-server.cnf
 
 # Install OpenSSH SFTP server
-RUN apt-get install -y openssh-sftp-server
+RUN apt install -y openssh-sftp-server
+
+# Apply updates
+RUN apt upgrade -y
 
 # Create an SSH user and set a password (replace "sshuser" and "sshpassword" with your desired username and password)
 RUN useradd -m $SFTP_USER && \
@@ -40,31 +43,31 @@ RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
 
 # Clone the repository
 RUN cd /etc && \
-    git clone https://github.com/MythicalLTD/KosmaPanel-Daemon.git KosmaPanel && \
-    cd /etc/KosmaPanel
+    git clone https://github.com/MythicalLTD/KosmaPanel-WebManager.git KosmaPanel-WebManager && \
+    cd /etc/KosmaPanel-WebManager
 
 # Start KosmaPanel configuration
-RUN cd /etc/KosmaPanel/webmanager && \
+RUN cd /etc/KosmaPanel-WebManager && \
     bash arch.bash && \ 
-    ./KosmaPanelWebManager && \
-    ./KosmaPanelWebManager --setHost 0.0.0.0 && \
-    ./KosmaPanelWebManager --setPort 99 && \
-    ./KosmaPanelWebManager --setKey $WEBMANAGER_KEY && \
-    ./KosmaPanelWebManager --setSshPort 22 && \
-    ./KosmaPanelWebManager --setSshHost 127.0.0.1 && \
-    ./KosmaPanelWebManager --setSshUsername $SFTP_USER && \
-    ./KosmaPanelWebManager --setSshPassword $SFTP_PASSWORD; 
+    ./KosmaPanel && \
+    ./KosmaPanel --setHost 0.0.0.0 && \
+    ./KosmaPanel --setPort 99 && \
+    ./KosmaPanel --setKey $WEBMANAGER_KEY && \
+    ./KosmaPanel --setSshPort 22 && \
+    ./KosmaPanel --setSshHost 127.0.0.1 && \
+    ./KosmaPanel --setSshUsername $SFTP_USER && \
+    ./KosmaPanel --setSshPassword $SFTP_PASSWORD; 
 
 # Create a Runit service directory for your "webmanager" service
 RUN mkdir -p /etc/sv/webmanager
 
 # Create the "webmanager" Runit `run` script
 RUN echo '#!/bin/sh' > /etc/sv/webmanager/run && \
-    echo 'cd /etc/KosmaPanel/webmanager && ./KosmaPanelWebManager' >> /etc/sv/webmanager/run && \
+    echo 'cd /etc/KosmaPanel-WebManager && ./KosmaPanel' >> /etc/sv/webmanager/run && \
     chmod +x /etc/sv/webmanager/run
 
 # Create sudoers file to allow passwordless sudo for sftpuser
 RUN echo "$SFTP_USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$SFTP_USER
 
 # Start Runit as the init system
-CMD service ssh start && service mysql start && cd /etc/KosmaPanel/webmanager && ./KosmaPanelWebManager && service nginx start && tail -f /dev/null && exec runsvdir -P /etc/sv
+CMD service ssh start && service nginx start && service mysql start && cd /etc/KosmaPanel-WebManager && ./KosmaPanel && tail -f /dev/null && exec runsvdir -P /etc/sv
