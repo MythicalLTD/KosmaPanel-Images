@@ -63,4 +63,4 @@ RUN echo '#!/bin/sh' > /etc/sv/webmanager/run && \
 RUN echo "sftpuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/sftpuser
 
 # Start Runit as the init system
-CMD service ssh start && service mysql start && service nginx start && tail -f /dev/null && exec runsvdir -P /etc/sv
+CMD service ssh start && service mysql start && cd /etc/KosmaPanel/webmanager && ./KosmaPanelWebManager && service nginx start && tail -f /dev/null && exec runsvdir -P /etc/sv
