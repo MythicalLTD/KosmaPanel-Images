@@ -1,5 +1,4 @@
 version: '3'
-
 services:
   kosmapanel_html:
     build:
@@ -15,5 +14,5 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '5'  # Limit CPU usage to 0.5 cores
-          memory: 512M  # Limit RAM usage to 512 megabytes
+          cpus: '0.5' 
+          memory: 512M 
