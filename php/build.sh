@@ -1,0 +1,1 @@
+docker build -t kosmapanel:php /var/www/KosmaPanel-Images/php

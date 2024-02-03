@@ -1,0 +1,18 @@
+version: '3'
+services:
+  kosmapanel_php:
+    build:
+      context: .
+    image: kosmapanel_php
+    container_name: kosmapanel_php
+    ports:
+      - "2222:22"  # Map host port 2222 to container port 22 (SFTP/SSH)
+      - "8888:80"  # Map host port 8000 to container port 80 (WebSite)
+      - "9999:99"  # Map host port 9999 to container port 99 (Daemon)
+      - "3333:3306" # Map host port 3333 to container port 3306 (MySQL) 
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.5' 
+          memory: 4G
